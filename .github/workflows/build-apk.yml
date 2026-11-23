@@ -13,15 +13,16 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Auto-Fix Project Structure
+    - name: Generate Clean Android Project
       run: |
         mkdir -p clean_app/app/src/main/assets
         mkdir -p clean_app/app/src/main/res/xml
         mkdir -p clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper
 
-        # dragon.html को ढूंढकर सही जगह रखना
         HTML_FILE=$(find . -name "dragon.html" | head -n 1)
-        if [ -n "$HTML_FILE" ]; then cp "$HTML_FILE" clean_app/app/src/main/assets/dragon.html; fi
+        if [ -n "$HTML_FILE" ]; then
+          cp "$HTML_FILE" clean_app/app/src/main/assets/dragon.html
+        fi
 
         cat << 'EOF' > clean_app/settings.gradle
         pluginManagement {
@@ -44,7 +45,7 @@ jobs:
 
         cat << 'EOF' > clean_app/build.gradle
         plugins {
-            id 'com.android.application' version '8.5.0' apply false
+            id 'com.android.application' version '8.2.2' apply false
         }
         EOF
 
@@ -79,7 +80,7 @@ jobs:
             }
         }
         dependencies {
-            implementation 'androidx.appcompat:appcompat:1.7.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
         }
         EOF
 
@@ -216,6 +217,8 @@ jobs:
         }
         EOF
 
+        sed -i 's/^[[:space:]]*//' clean_app/settings.gradle clean_app/build.gradle clean_app/gradle.properties clean_app/app/build.gradle clean_app/app/src/main/AndroidManifest.xml clean_app/app/src/main/res/xml/wallpaper.xml clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper/DragonWallpaperService.java
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -225,11 +228,11 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
-        gradle-version: '8.7'
+        gradle-version: '8.4'
 
     - name: Build Debug APK
       working-directory: clean_app
-      run: gradle assembleDebug
+      run: gradle assembleDebug --no-daemon
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
