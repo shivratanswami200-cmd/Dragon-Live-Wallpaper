@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive SVG Dragon</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+            background: radial-gradient(circle at center, #ecebe4 0%, #d4d3ca 100%);
+            cursor: crosshair;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<svg id="scene" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- ड्रैगन का सिर (Head) -->
+        <g id="Cabeza">
+            <path d="M -25,-12 C -10,-22 15,-12 32,0 C 15,12 -10,22 -25,12 C -18,5 -18,-5 -25,-12 Z" fill="#181818"/>
+            <path d="M -12,-14 L -34,-26 L -20,-8 Z" fill="#181818"/>
+            <path d="M -12,14 L -34,26 L -20,8 Z" fill="#181818"/>
+            <!-- आँखें -->
+            <ellipse cx="4" cy="-5" rx="4.5" ry="2.2" transform="rotate(-15 4 -5)" fill="#ecebe4"/>
+            <ellipse cx="4" cy="5" rx="4.5" ry="2.2" transform="rotate(15 4 5)" fill="#ecebe4"/>
+        </g>
+
+        <!-- रीढ़ की हड्डी का हिस्सा (Spine Segment) -->
+        <g id="Espina">
+            <path d="M -8,-10 C 0,-16 10,-10 14,0 C 10,10 0,16 -8,10 C -4,4 -4,-4 -8,-10 Z" fill="#222222"/>
+            <path d="M -2,-12 L -10,-24 L 4,-10 Z" fill="#3a3a3a" opacity="0.85"/>
+            <path d="M -2,12 L -10,24 L 4,10 Z" fill="#3a3a3a" opacity="0.85"/>
+        </g>
+
+        <!-- बड़े पंख (Wings) -->
+        <g id="Aletas">
+            <path d="M 0,0 C -25,-55 -85,-105 -150,-130 C -115,-85 -85,-45 -50,0 Z" fill="#1c1c1c" opacity="0.92"/>
+            <path d="M 0,0 C -25,55 -85,105 -150,130 C -115,85 -85,45 -50,0 Z" fill="#1c1c1c" opacity="0.92"/>
+            <!-- पंखों की नसें/धारियाँ -->
+            <path d="M -15,-12 Q -65,-58 -125,-95" stroke="#222" stroke-width="2" fill="none"/>
+            <path d="M -25,-18 Q -75,-45 -105,-68" stroke="#222" stroke-width="1.5" fill="none"/>
+            <path d="M -15,12 Q -65,58 -125,95" stroke="#222" stroke-width="2" fill="none"/>
+            <path d="M -25,18 Q -75,45 -105,68" stroke="#222" stroke-width="1.5" fill="none"/>
+        </g>
+    </defs>
+    <g id="screen"></g>
+</svg>
+
+<script>
+    const xmlns = "http://www.w3.org/2000/svg";
+    const xlinkns = "http://www.w3.org/1999/xlink";
+    const screen = document.getElementById("screen");
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let pointer = { x: width / 2, y: height / 2 };
+    let rad = 0;
+    let frm = Math.random();
+    const N = 40;
+    const elems = [];
+
+    window.addEventListener("resize", () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+    });
+
+    window.addEventListener("pointermove", (e) => {
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+        rad = 0;
+    });
+
+    function prepend(use, i) {
+        const elem = document.createElementNS(xmlns, "use");
+        elems[i].use = elem;
+        elem.setAttributeNS(xlinkns, "xlink:href", "#" + use);
+        screen.prepend(elem);
+    }
+
+    for (let i = 0; i < N; i++) {
+        elems[i] = { use: null, x: width / 2, y: height / 2 };
+    }
+
+    for (let i = 1; i < N; i++) {
+        if (i === 1) prepend("Cabeza", i);
+        else if (i === 8 || i === 14) prepend("Aletas", i);
+        else prepend("Espina", i);
+    }
+
+    const run = () => {
+        requestAnimationFrame(run);
+        let e = elems[0];
+        const ax = (Math.cos(3 * frm) * rad * width) / height;
+        const ay = (Math.sin(4 * frm) * rad * height) / width;
+        e.x += (ax + pointer.x - e.x) / 10;
+        e.y += (ay + pointer.y - e.y) / 10;
+
+        for (let i = 1; i < N; i++) {
+            let e = elems[i];
+            let ep = elems[i - 1];
+            const a = Math.atan2(e.y - ep.y, e.x - ep.x);
+            e.x += (ep.x - e.x + (Math.cos(a) * (100 - i)) / 5) / 4;
+            e.y += (ep.y - e.y + (Math.sin(a) * (100 - i)) / 5) / 4;
+            const s = (162 + 4 * (1 - i)) / 50;
+
+            e.use.setAttributeNS(
+                null,
+                "transform",
+                `translate(${(ep.x + e.x) / 2},${(ep.y + e.y) / 2}) rotate(${(180 / Math.PI) * a}) scale(${s},${s})`
+            );
+        }
+
+        if (rad < Math.min(width, height) / 2.2) rad++;
+        frm += 0.003;
+        if (rad > 60) {
+            pointer.x += (width / 2 - pointer.x) * 0.05;
+            pointer.y += (height / 2 - pointer.y) * 0.05;
+        }
+    };
+
+    run();
+</script>
+
+</body>
+</html>
