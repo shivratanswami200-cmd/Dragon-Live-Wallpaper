@@ -66,8 +66,8 @@ jobs:
                 applicationId "com.gurugyanora.dragonwallpaper"
                 minSdk 24
                 targetSdk 34
-                versionCode 1
-                versionName "1.0"
+                versionCode 2
+                versionName "1.1"
             }
             buildTypes {
                 release {
@@ -92,6 +92,16 @@ jobs:
                 android:allowBackup="true"
                 android:label="Interactive Dragon"
                 android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+                <activity
+                    android:name=".MainActivity"
+                    android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+
                 <service
                     android:name=".DragonWallpaperService"
                     android:enabled="true"
@@ -112,6 +122,37 @@ jobs:
         cat << 'EOF' > clean_app/app/src/main/res/xml/wallpaper.xml
         <?xml version="1.0" encoding="utf-8"?>
         <wallpaper xmlns:android="http://schemas.android.com/apk/res/android" />
+        EOF
+
+        cat << 'EOF' > clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper/MainActivity.java
+        package com.gurugyanora.dragonwallpaper;
+
+        import android.app.Activity;
+        import android.app.WallpaperManager;
+        import android.content.ComponentName;
+        import android.content.Intent;
+        import android.os.Bundle;
+        import android.widget.Toast;
+
+        public class MainActivity extends Activity {
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                try {
+                    Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+                    intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                            new ComponentName(this, DragonWallpaperService.class));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    try {
+                        startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER));
+                    } catch (Exception ex) {
+                        Toast.makeText(this, "Live Wallpaper not supported on this launcher", Toast.LENGTH_LONG).show();
+                    }
+                }
+                finish();
+            }
+        }
         EOF
 
         cat << 'EOF' > clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper/DragonWallpaperService.java
@@ -217,7 +258,7 @@ jobs:
         }
         EOF
 
-        sed -i 's/^[[:space:]]*//' clean_app/settings.gradle clean_app/build.gradle clean_app/gradle.properties clean_app/app/build.gradle clean_app/app/src/main/AndroidManifest.xml clean_app/app/src/main/res/xml/wallpaper.xml clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper/DragonWallpaperService.java
+        sed -i 's/^[[:space:]]*//' clean_app/settings.gradle clean_app/build.gradle clean_app/gradle.properties clean_app/app/build.gradle clean_app/app/src/main/AndroidManifest.xml clean_app/app/src/main/res/xml/wallpaper.xml clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper/MainActivity.java clean_app/app/src/main/java/com/gurugyanora/dragonwallpaper/DragonWallpaperService.java
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
