@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Interactive SVG Dragon</title>
     <style>
         body, html {
@@ -12,13 +12,19 @@
             height: 100%;
             overflow: hidden;
             touch-action: none;
-            background: radial-gradient(circle at center, #ecebe4 0%, #d4d3ca 100%);
-            cursor: crosshair;
+            background: #e9e4d9;
         }
         svg {
             width: 100%;
             height: 100%;
             display: block;
+        }
+        @keyframes pulseStar {
+            0%, 100% { transform: scale(0.85) rotate(0deg); opacity: 0.9; }
+            50% { transform: scale(1.25) rotate(25deg); opacity: 1; }
+        }
+        .star-glow {
+            animation: pulseStar 1.5s infinite ease-in-out;
         }
     </style>
 </head>
@@ -26,34 +32,47 @@
 
 <svg id="scene" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <!-- ड्रैगन का सिर (Head) -->
+        <!-- 3-स्टॉप रिच ग्रेडिएंट ताकि रंगों का बदलाव साफ दिखे -->
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop id="gradTop" offset="0%" stop-color="#fdfbf7" />
+            <stop id="gradMid" offset="50%" stop-color="#e8e1d1" />
+            <stop id="gradBot" offset="100%" stop-color="#c9bfa9" />
+        </linearGradient>
+
+        <!-- ड्रैगन का सिर -->
         <g id="Cabeza">
-            <path d="M -25,-12 C -10,-22 15,-12 32,0 C 15,12 -10,22 -25,12 C -18,5 -18,-5 -25,-12 Z" fill="#181818"/>
-            <path d="M -12,-14 L -34,-26 L -20,-8 Z" fill="#181818"/>
-            <path d="M -12,14 L -34,26 L -20,8 Z" fill="#181818"/>
-            <!-- आँखें -->
-            <ellipse cx="4" cy="-5" rx="4.5" ry="2.2" transform="rotate(-15 4 -5)" fill="#ecebe4"/>
-            <ellipse cx="4" cy="5" rx="4.5" ry="2.2" transform="rotate(15 4 5)" fill="#ecebe4"/>
+            <path d="M -25,-12 C -10,-22 15,-12 32,0 C 15,12 -10,22 -25,12 C -18,5 -18,-5 -25,-12 Z" fill="#141414"/>
+            <path d="M -12,-14 L -34,-26 L -20,-8 Z" fill="#141414"/>
+            <path d="M -12,14 L -34,26 L -20,8 Z" fill="#141414"/>
+            <ellipse cx="4" cy="-5" rx="4.5" ry="2.2" transform="rotate(-15 4 -5)" fill="#ffffff"/>
+            <ellipse cx="4" cy="5" rx="4.5" ry="2.2" transform="rotate(15 4 5)" fill="#ffffff"/>
         </g>
 
-        <!-- रीढ़ की हड्डी का हिस्सा (Spine Segment) -->
+        <!-- रीढ़ की हड्डी -->
         <g id="Espina">
-            <path d="M -8,-10 C 0,-16 10,-10 14,0 C 10,10 0,16 -8,10 C -4,4 -4,-4 -8,-10 Z" fill="#222222"/>
-            <path d="M -2,-12 L -10,-24 L 4,-10 Z" fill="#3a3a3a" opacity="0.85"/>
-            <path d="M -2,12 L -10,24 L 4,10 Z" fill="#3a3a3a" opacity="0.85"/>
+            <path d="M -8,-10 C 0,-16 10,-10 14,0 C 10,10 0,16 -8,10 C -4,4 -4,-4 -8,-10 Z" fill="#1f1f1f"/>
+            <path d="M -2,-12 L -10,-24 L 4,-10 Z" fill="#363636" opacity="0.85"/>
+            <path d="M -2,12 L -10,24 L 4,10 Z" fill="#363636" opacity="0.85"/>
         </g>
 
-        <!-- बड़े पंख (Wings) -->
+        <!-- पंख -->
         <g id="Aletas">
-            <path d="M 0,0 C -25,-55 -85,-105 -150,-130 C -115,-85 -85,-45 -50,0 Z" fill="#1c1c1c" opacity="0.92"/>
-            <path d="M 0,0 C -25,55 -85,105 -150,130 C -115,85 -85,45 -50,0 Z" fill="#1c1c1c" opacity="0.92"/>
-            <!-- पंखों की नसें/धारियाँ -->
+            <path d="M 0,0 C -25,-55 -85,-105 -150,-130 C -115,-85 -85,-45 -50,0 Z" fill="#181818" opacity="0.92"/>
+            <path d="M 0,0 C -25,55 -85,105 -150,130 C -115,85 -85,45 -50,0 Z" fill="#181818" opacity="0.92"/>
             <path d="M -15,-12 Q -65,-58 -125,-95" stroke="#222" stroke-width="2" fill="none"/>
             <path d="M -25,-18 Q -75,-45 -105,-68" stroke="#222" stroke-width="1.5" fill="none"/>
             <path d="M -15,12 Q -65,58 -125,95" stroke="#222" stroke-width="2" fill="none"/>
             <path d="M -25,18 Q -75,45 -105,68" stroke="#222" stroke-width="1.5" fill="none"/>
         </g>
+
+        <!-- चमकता तारा -->
+        <g id="StarShape">
+            <polygon points="0,-14 4,-4.5 14,-4.5 6,2 9,12 0,6.5 -9,12 -6,2 -14,-4.5 -4,-4.5" />
+        </g>
     </defs>
+
+    <rect width="100%" height="100%" fill="url(#bgGrad)" />
+    <g id="starsLayer"></g>
     <g id="screen"></g>
 </svg>
 
@@ -61,25 +80,129 @@
     const xmlns = "http://www.w3.org/2000/svg";
     const xlinkns = "http://www.w3.org/1999/xlink";
     const screen = document.getElementById("screen");
+    const starsLayer = document.getElementById("starsLayer");
+    const gradTop = document.getElementById("gradTop");
+    const gradMid = document.getElementById("gradMid");
+    const gradBot = document.getElementById("gradBot");
 
     let width = window.innerWidth;
     let height = window.innerHeight;
+
+    // ==========================================
+    // 1. ड्रैगन का छोटा और परफेक्ट मोबाइल साइज
+    // (0.20 = और छोटा | 0.26 = परफेक्ट | 0.35 = थोड़ा बड़ा)
+    // ==========================================
+    const DRAGON_SIZE = 0.26;
+
     let pointer = { x: width / 2, y: height / 2 };
     let rad = 0;
     let frm = Math.random();
-    const N = 40;
+    const N = 34;
     const elems = [];
+
+    // ==========================================
+    // 2. मल्टी-टोन ग्रेडिएंट थीम्स (बिना लाल रंग के)
+    // ==========================================
+    const colorThemes = [
+        // सुनहरा और क्रीम ग्रेडिएंट (Golden Amber)
+        { star: "#f59e0b", top: "#fffbeb", mid: "#fde68a", bot: "#f59e0b" },
+        // फिरोज़ी और समुद्री हरा ग्रेडिएंट (Aqua Teal)
+        { star: "#0d9488", top: "#f0fdfa", mid: "#99f6e4", bot: "#2dd4bf" },
+        // लैवेंडर और बैंगनी ग्रेडिएंट (Soft Violet)
+        { star: "#7c3aed", top: "#f5f3ff", mid: "#ddd6fe", bot: "#a78bfa" },
+        // आसमानी नीला ग्रेडिएंट (Ocean Sky)
+        { star: "#0284c7", top: "#f0f9ff", mid: "#bae6fd", bot: "#38bdf8" },
+        // हल्का हरा ग्रेडिएंट (Fresh Emerald)
+        { star: "#16a34a", top: "#f0fdf4", mid: "#bbf7d0", bot: "#4ade80" },
+        // पीच और सुनहरा ग्रेडिएंट (Warm Peach)
+        { star: "#ea580c", top: "#fff7ed", mid: "#fed7aa", bot: "#fb923c" }
+    ];
+
+    let themeIndex = 0;
+
+    let curTop = [253, 251, 247], tarTop = [253, 251, 247];
+    let curMid = [232, 225, 209], tarMid = [232, 225, 209];
+    let curBot = [201, 191, 169], tarBot = [201, 191, 169];
+
+    function hexToRgb(hex) {
+        const num = parseInt(hex.replace("#", ""), 16);
+        return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+    }
+
+    function rgbToString(rgb) {
+        return `rgb(${Math.round(rgb[0])}, ${Math.round(rgb[1])}, ${Math.round(rgb[2])})`;
+    }
+
+    let activeStar = null;
+
+    function spawnStar() {
+        if (activeStar && activeStar.el) activeStar.el.remove();
+
+        // हर बार अलग थीम चुनना ताकि एक ही रंग दोबारा न आए
+        themeIndex = (themeIndex + 1 + Math.floor(Math.random() * (colorThemes.length - 1))) % colorThemes.length;
+        const theme = colorThemes[themeIndex];
+
+        const margin = 45;
+        const sx = margin + Math.random() * (width - margin * 2);
+        const sy = margin + Math.random() * (height - margin * 2);
+
+        const g = document.createElementNS(xmlns, "g");
+        g.setAttribute("transform", `translate(${sx}, ${sy})`);
+
+        const useStar = document.createElementNS(xmlns, "use");
+        useStar.setAttributeNS(xlinkns, "xlink:href", "#StarShape");
+        useStar.setAttribute("fill", theme.star);
+        useStar.setAttribute("class", "star-glow");
+
+        g.appendChild(useStar);
+        starsLayer.appendChild(g);
+
+        activeStar = { x: sx, y: sy, theme: theme, el: g };
+    }
+
+    function createEatBurst(x, y, color) {
+        for (let i = 0; i < 8; i++) {
+            const c = document.createElementNS(xmlns, "circle");
+            const angle = (Math.PI * 2 * i) / 8;
+            c.setAttribute("cx", x);
+            c.setAttribute("cy", y);
+            c.setAttribute("r", "3.5");
+            c.setAttribute("fill", color);
+            starsLayer.appendChild(c);
+
+            let step = 0;
+            const anim = setInterval(() => {
+                step++;
+                c.setAttribute("cx", x + Math.cos(angle) * step * 5);
+                c.setAttribute("cy", y + Math.sin(angle) * step * 5);
+                c.setAttribute("opacity", 1 - step / 10);
+                if (step >= 10) {
+                    clearInterval(anim);
+                    c.remove();
+                }
+            }, 18);
+        }
+    }
 
     window.addEventListener("resize", () => {
         width = window.innerWidth;
         height = window.innerHeight;
     });
 
+    let userTouching = false;
     window.addEventListener("pointermove", (e) => {
         pointer.x = e.clientX;
         pointer.y = e.clientY;
         rad = 0;
+        userTouching = true;
     });
+    window.addEventListener("pointerdown", (e) => {
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+        rad = 0;
+        userTouching = true;
+    });
+    window.addEventListener("pointerup", () => { userTouching = false; });
 
     function prepend(use, i) {
         const elem = document.createElementNS(xmlns, "use");
@@ -88,32 +211,64 @@
         screen.prepend(elem);
     }
 
-    for (let i = 0; i < N; i++) {
-        elems[i] = { use: null, x: width / 2, y: height / 2 };
-    }
-
+    for (let i = 0; i < N; i++) elems[i] = { use: null, x: width / 2, y: height / 2 };
     for (let i = 1; i < N; i++) {
         if (i === 1) prepend("Cabeza", i);
-        else if (i === 8 || i === 14) prepend("Aletas", i);
+        else if (i === 7 || i === 13) prepend("Aletas", i);
         else prepend("Espina", i);
     }
 
+    spawnStar();
+
     const run = () => {
         requestAnimationFrame(run);
-        let e = elems[0];
-        const ax = (Math.cos(3 * frm) * rad * width) / height;
-        const ay = (Math.sin(4 * frm) * rad * height) / width;
-        e.x += (ax + pointer.x - e.x) / 10;
-        e.y += (ay + pointer.y - e.y) / 10;
 
+        const scaleUnit = (Math.min(width, height) / 360) * DRAGON_SIZE;
+
+        if (!userTouching && activeStar && rad > 30) {
+            pointer.x += (activeStar.x - pointer.x) * 0.035;
+            pointer.y += (activeStar.y - pointer.y) * 0.035;
+        }
+
+        let e = elems[0];
+        const ax = Math.cos(3 * frm) * rad * 0.5;
+        const ay = Math.sin(4 * frm) * rad * 0.5;
+        e.x += (ax + pointer.x - e.x) / 9;
+        e.y += (ay + pointer.y - e.y) / 9;
+
+        // तारा खाने की जाँच
+        if (activeStar) {
+            const head = elems[1];
+            const dist = Math.hypot(head.x - activeStar.x, head.y - activeStar.y);
+            if (dist < 26) {
+                tarTop = hexToRgb(activeStar.theme.top);
+                tarMid = hexToRgb(activeStar.theme.mid);
+                tarBot = hexToRgb(activeStar.theme.bot);
+                createEatBurst(activeStar.x, activeStar.y, activeStar.theme.star);
+                spawnStar();
+            }
+        }
+
+        // तेज़ और स्मूथ ग्रेडिएंट बदलाव (0.08 स्पीड पर)
+        for (let c = 0; c < 3; c++) {
+            curTop[c] += (tarTop[c] - curTop[c]) * 0.08;
+            curMid[c] += (tarMid[c] - curMid[c]) * 0.08;
+            curBot[c] += (tarBot[c] - curBot[c]) * 0.08;
+        }
+        gradTop.setAttribute("stop-color", rgbToString(curTop));
+        gradMid.setAttribute("stop-color", rgbToString(curMid));
+        gradBot.setAttribute("stop-color", rgbToString(curBot));
+
+        // शरीर के हिस्सों की मूवमेंट और छोटा साइज
         for (let i = 1; i < N; i++) {
             let e = elems[i];
             let ep = elems[i - 1];
             const a = Math.atan2(e.y - ep.y, e.x - ep.x);
-            e.x += (ep.x - e.x + (Math.cos(a) * (100 - i)) / 5) / 4;
-            e.y += (ep.y - e.y + (Math.sin(a) * (100 - i)) / 5) / 4;
-            const s = (162 + 4 * (1 - i)) / 50;
+            const spacing = ((85 - i * 1.1) / 5) * scaleUnit;
+            e.x += (ep.x - e.x + Math.cos(a) * spacing) / 4;
+            e.y += (ep.y - e.y + Math.sin(a) * spacing) / 4;
 
+            const s = ((145 + 3.5 * (1 - i)) / 48) * scaleUnit;
             e.use.setAttributeNS(
                 null,
                 "transform",
@@ -121,12 +276,8 @@
             );
         }
 
-        if (rad < Math.min(width, height) / 2.2) rad++;
-        frm += 0.003;
-        if (rad > 60) {
-            pointer.x += (width / 2 - pointer.x) * 0.05;
-            pointer.y += (height / 2 - pointer.y) * 0.05;
-        }
+        if (rad < Math.min(width, height) / 3.5) rad++;
+        frm += 0.004;
     };
 
     run();
