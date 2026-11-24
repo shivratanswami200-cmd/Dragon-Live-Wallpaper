@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Spider Clock Live Wallpaper (Mobile Optimized)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel+Decorative:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel+Decorative:wght@700;900&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -12,7 +12,6 @@
             padding: 0;
             -webkit-user-select: none;
             user-select: none;
-            pointer-events: none; /* पूरी स्क्रीन पर कोई टच ओवरहेड नहीं */
         }
         html, body {
             width: 100%;
@@ -33,28 +32,23 @@
             );
         }
 
-        /* घड़ी और कर्व नाम दोनों के लिए सटीक 1:1 गोल कंटेनर (मोबाइल पर कभी फ्लैट नहीं होगा) */
-        .square-stage {
+        /* लेयर 1: स्थिर कर्व नाम 'SHIV' (सटीक 1:1 गोल अनुपात में) */
+        #nameLayerWrapper {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90vw;
-            height: 90vw;
-            max-width: 400px;
-            max-height: 400px;
+            width: 88vmin;
+            height: 88vmin;
+            max-width: 420px;
+            max-height: 420px;
             aspect-ratio: 1 / 1;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        /* लेयर 1: बैकग्राउंड के जस्ट ऊपर स्थिर कर्व नाम 'SHIV' (जीव से नीचे) */
-        #nameLayerWrapper {
             z-index: 1;
+            pointer-events: none;
         }
 
         svg#curvedNameSvg {
+            display: block;
             width: 100%;
             height: 100%;
             overflow: visible;
@@ -63,13 +57,13 @@
         .shiv-curved-text {
             font-family: 'Cinzel Decorative', Georgia, serif;
             font-weight: 900;
-            font-size: 22px;
+            font-size: 23px;
             letter-spacing: 7px;
             fill: url(#shivGoldGrad);
             opacity: 0.78;
         }
 
-        /* लेयर 2: रैंडमली घूमता हुआ 108-टांगों वाला जीव (90% ओपेसिटी, 95% साइज) */
+        /* लेयर 2: टच-सेंसिटिव 108-टांगों वाला जीव */
         canvas#centipedeCanvas {
             position: fixed;
             top: 0;
@@ -79,17 +73,31 @@
             height: 100vh;
             z-index: 2;
             opacity: 0.90;
+            pointer-events: none;
         }
 
-        /* लेयर 3: मकड़ी वाली घड़ी (जीव से ऊपर) */
+        /* लेयर 3: मकड़ी वाली घड़ी (मोबाइल के लिए सटीक गोल 1:1 अनुपात, नॉन-टच) */
         #watchWrapper {
+            position: relative;
+            width: 88vmin;
+            height: 88vmin;
+            max-width: 420px;
+            max-height: 420px;
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             z-index: 3;
+            pointer-events: none;
         }
 
         svg#spiderWatch {
+            display: block;
             width: 100%;
             height: 100%;
             overflow: visible;
+            pointer-events: none;
         }
 
         .spider-part {
@@ -129,7 +137,7 @@
             stroke: #111111;
             stroke-width: 0.9px;
             paint-order: stroke fill;
-            font-family: 'Caveat', cursive, serif;
+            font-family: 'Caveat', 'Dancing Script', 'Segoe Script', 'Comic Sans MS', cursive, serif;
             font-style: italic;
             font-size: 22px;
             font-weight: 700;
@@ -151,14 +159,15 @@
             display: block;
             width: 100vw;
             height: 100vh;
-            z-index: 10;
+            z-index: 20;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-<!-- लेयर 1: बैकग्राउंड के जस्ट ऊपर स्थिर कर्व नाम 'SHIV' (10 से 2 के बीच) -->
-<div id="nameLayerWrapper" class="square-stage">
+<!-- लेयर 1: स्थिर कर्व नाम 'SHIV' -->
+<div id="nameLayerWrapper">
     <svg id="curvedNameSvg" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <path id="shivArc" d="M 26,76.3 A 158,158 0 0,1 294,76.3" />
@@ -174,13 +183,13 @@
     </svg>
 </div>
 
-<!-- लेयर 2: रैंडमली रेंगता हुआ 108-टांगों वाला जीव -->
+<!-- लेयर 2: 108-टांगों वाला रेंगता हुआ जीव -->
 <canvas id="centipedeCanvas"></canvas>
 
-<!-- लेयर 3: मकड़ी वाली घड़ी -->
-<div id="watchWrapper" class="square-stage">
+<!-- लेयर 3: मकड़ी वाली घड़ी (नॉन-टच, सटीक गोल अनुपात) -->
+<div id="watchWrapper">
     <svg id="spiderWatch" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-        <line x1="160" y1="-550" x2="160" y2="160" class="web-line" />
+        <line x1="160" y1="-450" x2="160" y2="160" class="web-line" />
         <g id="spiderWebLayer"></g>
 
         <g id="gearsLayer">
@@ -227,12 +236,12 @@
     </svg>
 </div>
 
-<!-- लेयर 4: ऊपर से लटकते हुए धागे (बिना टच के, हल्की हवा में लहराते हुए) -->
+<!-- लेयर 4: ऊपर से लटकते हुए धागे -->
 <canvas id="threadsCanvas"></canvas>
 
 <script>
     /* =========================================================================
-       1. 108-टांगों वाला रेंगता हुआ जीव (बिना टच के, रैंडम स्वतंत्र विचरण)
+       1. 108-टांगों वाला रेंगता हुआ जीव (टच सेंसिटिव + मोबाइल GPU ऑप्टिमाइज्ड)
        ========================================================================= */
     (() => {
         const canvas = document.getElementById('centipedeCanvas');
@@ -247,29 +256,76 @@
         });
 
         const CREATURE_SCALE = 0.95;
-        const LEG_SEGMENTS = 54;
+        const LEG_SEGMENTS = 54; 
         const TAIL_SEGMENTS = 18;
         const N = 1 + LEG_SEGMENTS + TAIL_SEGMENTS;
         const segDist = 7.5 * CREATURE_SCALE;
 
         const elems = [];
-        for (let i = 0; i < N; i++) {
-            elems[i] = { x: width / 2 - i * segDist, y: height * 0.72 };
-        }
-
-        // स्वतंत्र रैंडम लक्ष्य (Autonomous Random Roaming)
-        let target = {
-            x: width * 0.75,
-            y: height * 0.25
-        };
-        let currentAngle = 0;
+        const pointer = { x: width / 2 + 120, y: height / 2 };
         let walkPhase = 0;
 
-        function pickNewRandomTarget() {
-            const marginX = width * 0.1;
-            const marginY = height * 0.08;
-            target.x = marginX + Math.random() * (width - marginX * 2);
-            target.y = marginY + Math.random() * (height - marginY * 2);
+        // माउस और मोबाइल टच दोनों के लिए सटीक ट्रैकिंग
+        window.addEventListener('pointermove', (e) => {
+            pointer.x = e.clientX;
+            pointer.y = e.clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                pointer.x = e.touches[0].clientX;
+                pointer.y = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                pointer.x = e.touches[0].clientX;
+                pointer.y = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        for (let i = 0; i < N; i++) {
+            elems[i] = { x: width / 2 - i * segDist, y: height / 2 };
+        }
+
+        // पहले से तैयार स्प्राइट कैश (ताकि हर फ्रेम पर 72 ग्रेडिएंट्स बनाकर CPU लोड न बढ़े)
+        const segmentSprites = [];
+        for (let i = 0; i < N; i++) {
+            let radius;
+            if (i <= LEG_SEGMENTS) {
+                const p = i / LEG_SEGMENTS;
+                radius = (8.5 - p * 3.5) * CREATURE_SCALE;
+            } else {
+                const tp = (i - LEG_SEGMENTS) / TAIL_SEGMENTS;
+                radius = (5 * (1 - tp * 0.85) + 0.8) * CREATURE_SCALE;
+            }
+            const pad = 4;
+            const sCanvas = document.createElement('canvas');
+            const w = Math.ceil((radius * 1.15 + pad) * 2);
+            const h = Math.ceil((radius + pad) * 2);
+            sCanvas.width = w;
+            sCanvas.height = h;
+            const sCtx = sCanvas.getContext('2d');
+            sCtx.translate(w / 2, h / 2);
+
+            const grad = sCtx.createRadialGradient(0, -radius * 0.2, radius * 0.1, 0, 0, radius);
+            grad.addColorStop(0, '#5c3a21');
+            grad.addColorStop(0.7, '#26170d');
+            grad.addColorStop(1, '#0d0805');
+
+            sCtx.fillStyle = grad;
+            sCtx.beginPath();
+            sCtx.ellipse(0, 0, radius * 1.15, radius, 0, 0, Math.PI * 2);
+            sCtx.fill();
+
+            sCtx.strokeStyle = 'rgba(255, 200, 150, 0.18)';
+            sCtx.lineWidth = 0.8 * CREATURE_SCALE;
+            sCtx.beginPath();
+            sCtx.arc(0, 0, radius * 0.85, -Math.PI / 2, Math.PI / 2);
+            sCtx.stroke();
+
+            segmentSprites[i] = { canvas: sCanvas, hw: w / 2, hh: h / 2 };
         }
 
         function run() {
@@ -277,29 +333,23 @@
             ctx.clearRect(0, 0, width, height);
 
             let head = elems[0];
-            const dx = target.x - head.x;
-            const dy = target.y - head.y;
+            const dx = pointer.x - head.x;
+            const dy = pointer.y - head.y;
             const dist = Math.hypot(dx, dy);
 
-            // लक्ष्य के पास पहुंचते ही नया रैंडम रास्ता चुन लेगा
-            if (dist < 45) {
-                pickNewRandomTarget();
+            const headAngle = Math.atan2(dy, dx);
+
+            let moveSpeed = 0;
+            if (dist > 6) {
+                moveSpeed = Math.min(dist * 0.08, 7.5);
+                const slither = Math.sin(walkPhase * 0.6) * Math.min(dist * 0.03, 1.8);
+                const perpAngle = headAngle + Math.PI / 2;
+
+                head.x += Math.cos(headAngle) * moveSpeed + Math.cos(perpAngle) * slither * 0.25;
+                head.y += Math.sin(headAngle) * moveSpeed + Math.sin(perpAngle) * slither * 0.25;
+
+                walkPhase += moveSpeed * 0.16;
             }
-
-            // दिशा को झटके के बजाय स्मूथ कर्व में मोड़ना
-            const desiredAngle = Math.atan2(dy, dx);
-            let angleDiff = desiredAngle - currentAngle;
-            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-            currentAngle += angleDiff * 0.045;
-
-            const moveSpeed = 2.6;
-            const slither = Math.sin(walkPhase * 0.55) * 0.75;
-            const perpAngle = currentAngle + Math.PI / 2;
-
-            head.x += Math.cos(currentAngle) * moveSpeed + Math.cos(perpAngle) * slither * 0.25;
-            head.y += Math.sin(currentAngle) * moveSpeed + Math.sin(perpAngle) * slither * 0.25;
-            walkPhase += moveSpeed * 0.18;
 
             for (let i = 1; i < N; i++) {
                 let curr = elems[i];
@@ -355,46 +405,22 @@
             }
             ctx.restore();
 
-            // 3. पूंछ से लेकर गर्दन तक शरीर के खंड (GPU बचाने के लिए फ़ास्ट सॉलिड-शेड रेंडरिंग)
+            // 3. पूंछ से लेकर गर्दन तक शरीर के खंड (Cached Sprites से तेज़ रेंडरिंग)
             for (let i = N - 1; i >= 1; i--) {
                 let curr = elems[i];
                 let prev = elems[i - 1];
                 const angle = Math.atan2(prev.y - curr.y, prev.x - curr.x);
-
-                let radius;
-                if (i <= LEG_SEGMENTS) {
-                    const p = i / LEG_SEGMENTS;
-                    radius = (8.5 - p * 3.5) * CREATURE_SCALE;
-                } else {
-                    const tp = (i - LEG_SEGMENTS) / TAIL_SEGMENTS;
-                    radius = (5 * (1 - tp * 0.85) + 0.8) * CREATURE_SCALE;
-                }
+                const sp = segmentSprites[i];
 
                 ctx.save();
                 ctx.translate(curr.x, curr.y);
                 ctx.rotate(angle);
-
-                ctx.fillStyle = '#24140a';
-                ctx.beginPath();
-                ctx.ellipse(0, 0, radius * 1.15, radius, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#4f311b';
-                ctx.beginPath();
-                ctx.ellipse(0, -radius * 0.15, radius * 0.75, radius * 0.6, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = 'rgba(255, 200, 150, 0.16)';
-                ctx.lineWidth = 0.8 * CREATURE_SCALE;
-                ctx.beginPath();
-                ctx.arc(0, 0, radius * 0.85, -Math.PI / 2, Math.PI / 2);
-                ctx.stroke();
-
+                ctx.drawImage(sp.canvas, -sp.hw, -sp.hh);
                 ctx.restore();
             }
 
             // 4. मकड़ी जैसा चेहरा और चेहरे की बड़ी टांगें
-            drawSpiderHead(ctx, head.x, head.y, currentAngle, walkPhase, moveSpeed, CREATURE_SCALE);
+            drawSpiderHead(ctx, head.x, head.y, headAngle, walkPhase, moveSpeed, CREATURE_SCALE);
         }
 
         function drawCentipedeLeg(ctx, side, wave, upperLen, lowerLen, scale) {
@@ -422,7 +448,7 @@
             ctx.rotate(angle);
             ctx.scale(scale, scale);
 
-            const twitch = Math.sin(phase * 1.5) * 0.16;
+            const twitch = speed > 0.1 ? Math.sin(phase * 1.5) * 0.18 : Math.sin(Date.now() * 0.004) * 0.05;
 
             ctx.strokeStyle = '#140c07';
             ctx.lineCap = 'round';
@@ -469,14 +495,14 @@
             ctx.lineTo(14, 1);
             ctx.fill();
 
-            ctx.fillStyle = '#1c1008';
+            const headGrad = ctx.createRadialGradient(2, 0, 2, 0, 0, 16);
+            headGrad.addColorStop(0, '#4a2e1b');
+            headGrad.addColorStop(0.75, '#1c1008');
+            headGrad.addColorStop(1, '#080402');
+
+            ctx.fillStyle = headGrad;
             ctx.beginPath();
             ctx.ellipse(3, 0, 14, 12, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#3d2514';
-            ctx.beginPath();
-            ctx.ellipse(2, 0, 9, 7.5, 0, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#ff3b30';
@@ -501,7 +527,7 @@
 
 
     /* =========================================================================
-       2. मकड़ी वाली घड़ी (बिना टच और बिना बाहरी सर्कल के)
+       2. मकड़ी वाली घड़ी (पूरी तरह स्थिर और नॉन-टच)
        ========================================================================= */
     (() => {
         const svgNS = "http://www.w3.org/2000/svg";
@@ -723,95 +749,286 @@
 
 
     /* =========================================================================
-       3. लटकते हुए रेशमी धागे (टच सेंसर हटाया गया, हल्की हवा में लहराते हुए)
+       3. लटकते हुए रेशमी धागों का कोड (वही स्ट्रक्चर + लो CPU/GPU ऑप्टिमाइजेशन)
        ========================================================================= */
     (() => {
-        const canvas = document.getElementById('threadsCanvas');
-        const ctx = canvas.getContext('2d');
+        class Vector {
+          constructor(x = 0, y = 0) {
+            this.x = x;
+            this.y = y;
+          }
+          static sub(v1, v2) {
+            return new Vector(v1.x - v2.x, v1.y - v2.y);
+          }
+          add(v) {
+            this.x += v.x;
+            this.y += v.y;
+            return this;
+          }
+          mult(n) {
+            this.x *= n;
+            this.y *= n;
+            return this;
+          }
+          setXY(x, y) {
+            this.x = x;
+            this.y = y;
+            return this;
+          }
+          dist(v) {
+            const dx = this.x - v.x;
+            const dy = this.y - v.y;
+            return Math.sqrt(dx * dx + dy * dy);
+          }
+        }
 
-        let width = 0;
-        let height = 0;
-        let threads = [];
+        class Mouse {
+          constructor() {
+            this.pos = new Vector(-1000, -1000);
+            this.radius = 65;
+
+            window.addEventListener('mousemove', (e) => {
+              this.pos.setXY(e.clientX, e.clientY);
+            }, { passive: true });
+
+            window.addEventListener('mouseleave', () => {
+              this.pos.setXY(-1000, -1000);
+            });
+
+            window.addEventListener('touchstart', (e) => {
+              if (e.touches.length > 0) {
+                this.pos.setXY(e.touches[0].clientX, e.touches[0].clientY);
+              }
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+              if (e.touches.length > 0) {
+                this.pos.setXY(e.touches[0].clientX, e.touches[0].clientY);
+              }
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => {
+              this.pos.setXY(-1000, -1000);
+            }, { passive: true });
+          }
+        }
 
         function createTinyDotSprite() {
-            const sprite = document.createElement('canvas');
-            const size = 10;
-            sprite.width = size;
-            sprite.height = size;
-            const sCtx = sprite.getContext('2d');
-            const center = size / 2;
+          const sprite = document.createElement('canvas');
+          const size = 12;
+          sprite.width = size;
+          sprite.height = size;
+          const sCtx = sprite.getContext('2d');
+          const center = size / 2;
 
-            const grad = sCtx.createRadialGradient(center, center, 0, center, center, center);
-            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            grad.addColorStop(0.4, 'rgba(235, 242, 255, 0.45)');
-            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          const grad = sCtx.createRadialGradient(center, center, 0, center, center, center);
+          grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+          grad.addColorStop(0.35, 'rgba(235, 242, 255, 0.55)');
+          grad.addColorStop(0.7, 'rgba(200, 215, 255, 0.12)');
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-            sCtx.fillStyle = grad;
-            sCtx.fillRect(0, 0, size, size);
+          sCtx.fillStyle = grad;
+          sCtx.fillRect(0, 0, size, size);
 
-            sCtx.fillStyle = '#ffffff';
-            sCtx.beginPath();
-            sCtx.arc(center, center, 1.3, 0, Math.PI * 2);
-            sCtx.fill();
+          sCtx.fillStyle = '#ffffff';
+          sCtx.beginPath();
+          sCtx.arc(center, center, 1.35, 0, Math.PI * 2);
+          sCtx.fill();
 
-            return sprite;
+          return sprite;
         }
 
         const DOT_SPRITE = createTinyDotSprite();
 
-        function initThreads() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            threads = [];
+        class Dot {
+          constructor(x, y) {
+            this.pos = new Vector(x, y);
+            this.oldPos = new Vector(x, y);
+            this.friction = 0.96;
+            this.gravity = new Vector(0, 0.58);
+            this.pinned = false;
+            this.dotSize = 6;
+          }
 
-            // मोबाइल पर स्मूथ परफॉर्मेंस के लिए ऑप्टिमाइज्ड संख्या
-            const total = Math.min(Math.floor(width * 0.34), 220);
+          update(mouse) {
+            if (this.pinned) return;
+
+            let vel = Vector.sub(this.pos, this.oldPos);
+            this.oldPos.setXY(this.pos.x, this.pos.y);
+
+            vel.mult(this.friction);
+            vel.add(this.gravity);
+            this.pos.add(vel);
+
+            let dx = mouse.pos.x - this.pos.x;
+            let dy = mouse.pos.y - this.pos.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < mouse.radius * mouse.radius && distSq > 0) {
+              const dist = Math.sqrt(distSq);
+              const force = (mouse.radius - dist) / mouse.radius;
+              this.pos.x -= (dx / dist) * force * 2.4;
+              this.pos.y -= (dy / dist) * force * 2.4;
+            }
+          }
+
+          drawPoint(ctx) {
+            ctx.drawImage(
+              DOT_SPRITE,
+              this.pos.x - this.dotSize / 2,
+              this.pos.y - this.dotSize / 2,
+              this.dotSize,
+              this.dotSize
+            );
+          }
+        }
+
+        class Stick {
+          constructor(p1, p2) {
+            this.startPoint = p1;
+            this.endPoint = p2;
+            this.length = this.startPoint.pos.dist(this.endPoint.pos);
+            this.tension = 0.45;
+          }
+
+          update() {
+            const dx = this.endPoint.pos.x - this.startPoint.pos.x;
+            const dy = this.endPoint.pos.y - this.startPoint.pos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist === 0) return;
+
+            const diff = (dist - this.length) / dist;
+            const offsetX = dx * diff * this.tension;
+            const offsetY = dy * diff * this.tension;
+
+            if (!this.startPoint.pinned) {
+              this.startPoint.pos.x += offsetX * 0.5;
+              this.startPoint.pos.y += offsetY * 0.5;
+            }
+            if (!this.endPoint.pinned) {
+              this.endPoint.pos.x -= offsetX * 0.5;
+              this.endPoint.pos.y -= offsetY * 0.5;
+            }
+          }
+        }
+
+        class Rope {
+          constructor(config) {
+            this.x = config.x;
+            this.y = config.y;
+            this.segments = config.segments || 8;
+            this.gap = config.gap || 15;
+            this.dots = [];
+            this.sticks = [];
+            this.iterations = 4; // मोबाइल पर लोड कम करने के लिए 7 से 4 किया गया
+            this.create();
+          }
+
+          pin(index) {
+            this.dots[index].pinned = true;
+          }
+
+          create() {
+            for (let i = 0; i < this.segments; i++) {
+              this.dots.push(new Dot(this.x, this.y + i * this.gap));
+            }
+            for (let i = 0; i < this.segments - 1; i++) {
+              this.sticks.push(new Stick(this.dots[i], this.dots[i + 1]));
+            }
+          }
+
+          update(mouse) {
+            for (let i = 0; i < this.dots.length; i++) {
+              this.dots[i].update(mouse);
+            }
+            for (let iter = 0; iter < this.iterations; iter++) {
+              for (let j = 0; j < this.sticks.length; j++) {
+                this.sticks[j].update();
+              }
+            }
+          }
+
+          drawThread(ctx) {
+            ctx.moveTo(this.dots[0].pos.x, this.dots[0].pos.y);
+            for (let i = 1; i < this.dots.length; i++) {
+              ctx.lineTo(this.dots[i].pos.x, this.dots[i].pos.y);
+            }
+          }
+
+          drawEndPoint(ctx) {
+            this.dots[this.dots.length - 1].drawPoint(ctx);
+          }
+        }
+
+        class App {
+          constructor() {
+            this.canvas = document.getElementById('threadsCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.mouse = new Mouse();
+            this.ropes = [];
+
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+          }
+
+          createRopes() {
+            this.ropes = [];
+            // मोबाइल और डेस्कटॉप पर हल्का रखने के लिए संतुलित संख्या
+            const isMobile = this.width < 600;
+            const total = Math.floor(this.width * (isMobile ? 0.25 : 0.32));
 
             for (let i = 0; i < total; i++) {
-                const x = width * 0.08 + Math.random() * (width * 0.84);
-                const length = height * (0.16 + Math.random() * 0.24);
-                const phase = Math.random() * Math.PI * 2;
-                const speed = 0.008 + Math.random() * 0.008;
-                const amp = 3 + Math.random() * 6;
-                threads.push({ x, length, phase, speed, amp });
+              const x = this.randomBetween(this.width * 0.08, this.width * 0.92);
+              const y = 0;
+              const gap = this.randomBetween(this.height * 0.022, this.height * 0.052);
+              const segments = 8;
+
+              const rope = new Rope({ x, y, gap, segments });
+              rope.pin(0);
+              this.ropes.push(rope);
             }
+          }
+
+          resize() {
+            // मोबाइल GPU पर भारी लोड से बचने के लिए DPR 1 रखा गया है
+            const dpr = 1;
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+
+            this.canvas.width = this.width * dpr;
+            this.canvas.height = this.height * dpr;
+            this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            this.createRopes();
+          }
+
+          randomBetween(min, max) {
+            return Math.random() * (max - min) + min;
+          }
+
+          render() {
+            this.ctx.clearRect(0, 0, this.width, this.height);
+
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = 'rgba(175, 180, 195, 0.28)';
+            this.ctx.lineWidth = 0.75;
+
+            for (let i = 0; i < this.ropes.length; i++) {
+              this.ropes[i].update(this.mouse);
+              this.ropes[i].drawThread(this.ctx);
+            }
+            this.ctx.stroke();
+
+            for (let i = 0; i < this.ropes.length; i++) {
+              this.ropes[i].drawEndPoint(this.ctx);
+            }
+
+            requestAnimationFrame(() => this.render());
+          }
         }
 
-        window.addEventListener('resize', initThreads);
-        initThreads();
-
-        function renderThreads() {
-            ctx.clearRect(0, 0, width, height);
-
-            ctx.beginPath();
-            ctx.strokeStyle = 'rgba(175, 180, 195, 0.28)';
-            ctx.lineWidth = 0.75;
-
-            for (let i = 0; i < threads.length; i++) {
-                const t = threads[i];
-                t.phase += t.speed;
-
-                const swayX = Math.sin(t.phase) * t.amp;
-                const endX = t.x + swayX;
-                const endY = t.length;
-
-                ctx.moveTo(t.x, 0);
-                ctx.quadraticCurveTo(t.x + swayX * 0.4, endY * 0.55, endX, endY);
-
-                t.endX = endX;
-                t.endY = endY;
-            }
-            ctx.stroke();
-
-            for (let i = 0; i < threads.length; i++) {
-                const t = threads[i];
-                ctx.drawImage(DOT_SPRITE, t.endX - 3, t.endY - 3, 6, 6);
-            }
-
-            requestAnimationFrame(renderThreads);
-        }
-
-        renderThreads();
+        const app = new App();
+        app.render();
     })();
 </script>
 
